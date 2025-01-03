@@ -18,7 +18,16 @@
 
       <template v-slot:append>
         <div class="d-flex align-center gap-4">
-          <AddRecipeDialog v-if="!$vuetify.display.smAndDown" />
+          <v-btn
+            v-if="!$vuetify.display.smAndDown"
+            color="primary"
+            class="text-none"
+            prepend-icon="mdi-plus"
+            variant="flat"
+            @click="showAddRecipeDialog = true"
+          >
+            Новый рецепт
+          </v-btn>
           <v-btn
             icon
             @click="toggleTheme"
@@ -56,7 +65,6 @@
     </v-main>
 
     <AddRecipeDialog 
-      v-if="$vuetify.display.smAndDown"
       v-model="showAddRecipeDialog"
       @close="showAddRecipeDialog = false"
     />

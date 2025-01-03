@@ -1,114 +1,78 @@
 <template>
   <v-dialog
-    v-model="dialog"
+    :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event)"
     max-width="500px"
-    @update:model-value="handleDialogUpdate"
+    @click:outside="close"
   >
-    <template v-slot:activator="{ props: dialogProps }">
-      <v-btn
-        v-if="!$vuetify.display.smAndDown"
-        color="primary"
-        v-bind="dialogProps"
-        class="text-none"
-        prepend-icon="mdi-plus"
-        variant="flat"
-      >
-        Новый рецепт
-      </v-btn>
-    </template>
-
     <v-card>
-      <v-card-title class="text-primary pb-2">
-        <span>Новый рецепт</span>
+      <v-card-title class="text-h5 pa-4">
+        Новый рецепт
       </v-card-title>
 
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="recipeName"
-                label="Название блюда"
-                variant="outlined"
-                density="comfortable"
-                hide-details="auto"
-                class="mb-4"
-                color="primary"
-                bg-color="surface"
-                @keyup.enter="focusIngredientInput"
-              />
-            </v-col>
-            <v-col cols="12">
-              <div class="d-flex align-center mb-4">
-                <v-text-field
-                  ref="ingredientInput"
-                  v-model="newIngredient"
-                  label="Добавить ингредиент"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details="auto"
-                  class="flex-grow-1"
-                  color="primary"
-                  bg-color="surface"
-                  @keyup.enter="addIngredient"
-                />
-                <v-btn
-                  icon
-                  variant="text"
-                  color="primary"
-                  class="ml-2"
-                  @click="addIngredient"
-                  :disabled="!newIngredient"
-                >
-                  <v-icon icon="mdi-plus" />
-                </v-btn>
-              </div>
-              
-              <v-list v-if="ingredients.length" class="bg-surface rounded-lg mb-4">
-                <v-list-item
-                  v-for="(ingredient, index) in ingredients"
-                  :key="index"
-                  density="compact"
-                >
-                  <template v-slot:prepend>
-                    <v-icon
-                      icon="mdi-close"
-                      size="small"
-                      color="error"
-                      class="mr-2 cursor-pointer"
-                      @click="removeIngredient(index)"
-                    />
-                  </template>
-                  <v-list-item-title class="text-secondary">{{ ingredient }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
+      <v-card-text class="pa-4 pt-2">
+        <v-text-field
+          v-model="recipeName"
+          label="Название рецепта"
+          variant="outlined"
+          density="comfortable"
+          hide-details
+          class="mb-4"
+          @keyup.enter="focusIngredientInput"
+        />
 
-              <div v-else class="text-caption text-secondary mb-4">
-                Добавьте хотя бы один ингредиент
-              </div>
-            </v-col>
-          </v-row>
-        </v-container>
+        <v-text-field
+          ref="ingredientInput"
+          v-model="newIngredient"
+          label="Добавить ингредиент"
+          append-inner-icon="mdi-plus"
+          variant="outlined"
+          density="comfortable"
+          hide-details
+          class="mb-2"
+          @click:append-inner="addIngredient"
+          @keyup.enter="addIngredient"
+        />
+
+        <v-list v-if="ingredients.length > 0" class="pa-0 mt-2">
+          <v-list-item
+            v-for="(ingredient, index) in ingredients"
+            :key="index"
+            density="comfortable"
+          >
+            <template v-slot:prepend>
+              <v-icon
+                color="error"
+                class="mr-2 cursor-pointer"
+                @click="removeIngredient(index)"
+              >
+                mdi-close
+              </v-icon>
+            </template>
+            <v-list-item-title>{{ ingredient }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
       </v-card-text>
 
-      <v-card-actions>
+      <v-divider />
+
+      <v-card-actions class="pa-4">
         <v-spacer />
         <v-btn
-          color="secondary"
+          color="primary"
           variant="text"
           @click="close"
-          class="text-none"
+          :disabled="saving"
         >
           Отмена
         </v-btn>
         <v-btn
           color="primary"
           @click="save"
-          :disabled="!isValid"
-          class="text-none"
           :loading="saving"
+          :disabled="!isValid"
         >
-          Создать
+          Сохранить
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -116,11 +80,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useRecipeStore } from '../stores/recipe';
 
 const props = defineProps<{
-  modelValue?: boolean
+  modelValue: boolean
 }>();
 
 const emit = defineEmits<{
@@ -130,26 +94,11 @@ const emit = defineEmits<{
 
 const recipeStore = useRecipeStore();
 
-// Используем локальное состояние для диалога
-const dialog = computed({
-  get: () => props.modelValue ?? false,
-  set: (value) => {
-    emit('update:modelValue', value);
-    if (!value) emit('close');
-  }
-});
-
 const recipeName = ref('');
 const ingredients = ref<string[]>([]);
 const newIngredient = ref('');
 const saving = ref(false);
 const ingredientInput = ref<HTMLElement | null>(null);
-
-watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
-    close();
-  }
-});
 
 const isValid = computed(() => {
   return recipeName.value.trim() !== '' && ingredients.value.length > 0;
@@ -189,17 +138,12 @@ const save = async () => {
 };
 
 const close = () => {
-  dialog.value = false;
+  emit('update:modelValue', false);
+  emit('close');
   recipeName.value = '';
   ingredients.value = [];
   newIngredient.value = '';
   saving.value = false;
-};
-
-const handleDialogUpdate = (value: boolean) => {
-  if (!value) {
-    close();
-  }
 };
 </script>
 
