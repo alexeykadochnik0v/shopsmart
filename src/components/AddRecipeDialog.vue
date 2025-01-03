@@ -83,7 +83,7 @@
 import { ref, computed } from 'vue';
 import { useRecipeStore } from '../stores/recipe';
 
-const props = defineProps<{
+defineProps<{
   modelValue: boolean
 }>();
 
