@@ -2,32 +2,28 @@
   <v-list class="shopping-items" :lines="false">
     <TransitionGroup name="list">
       <v-list-item
-        v-for="item in sortedItems"
+        v-for="item in store.sortedItems"
         :key="item.id"
-        :value="item"
-        class="px-0 shopping-item"
+        :class="['shopping-item', { 'completed': item.completed }]"
+        class="px-0"
         :active="false"
         :hover="false"
         :color="theme.global.current.value.dark ? 'background' : 'surface'"
-        @click="toggleItem(item)"
       >
         <template v-slot:prepend>
           <v-checkbox
             v-model="item.completed"
+            @change="toggleItem(item.id)"
             hide-details
             color="primary"
             density="compact"
-            @click.stop
-            @change="updateItem(item)"
           />
         </template>
 
-        <v-list-item-title 
-          :class="{ 
-            'text-decoration-line-through': item.completed,
-            'text-disabled': item.completed
-          }"
+        <v-list-item-title
           class="shopping-item-text"
+          :class="{ 'text-decoration-line-through': item.completed, 'text-disabled': item.completed }"
+          @click="toggleItem(item.id)"
         >
           {{ item.text }}
         </v-list-item-title>
@@ -38,7 +34,7 @@
             variant="text"
             size="small"
             color="error"
-            @click.stop="deleteItem(item)"
+            @click.stop="deleteItem(item.id)"
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
@@ -49,14 +45,14 @@
 
   <v-fade-transition>
     <div
-      v-if="completedItems.length > 0"
+      v-if="store.completedItems.length > 0"
       class="d-flex justify-end mt-4 px-4"
     >
       <v-btn
         color="error"
         variant="text"
         prepend-icon="mdi-delete-sweep"
-        @click="clearCompleted"
+        @click="store.clearCompleted"
       >
         Удалить завершенные
       </v-btn>
@@ -68,48 +64,17 @@
 import { computed } from 'vue';
 import { useTheme } from 'vuetify';
 import { useShoppingStore } from '../stores/shopping';
-import type { ShoppingItem } from '../stores/shopping';
+import { TransitionGroup } from 'vue';
 
 const theme = useTheme();
 const store = useShoppingStore();
 
-const props = defineProps<{
-  items: ShoppingItem[]
-}>();
-
-const sortedItems = computed(() => {
-  return [...props.items].sort((a, b) => {
-    if (a.completed === b.completed) {
-      // Если оба элемента завершены или оба не завершены,
-      // сортируем по времени добавления (id содержит timestamp)
-      return b.id.localeCompare(a.id);
-    }
-    // Незавершенные элементы всегда сверху
-    return a.completed ? 1 : -1;
-  });
-});
-
-const completedItems = computed(() => {
-  return props.items.filter(item => item.completed);
-});
-
-const toggleItem = (item: ShoppingItem) => {
-  store.updateItem({
-    ...item,
-    completed: !item.completed
-  });
+const toggleItem = (id: string) => {
+  store.toggleItem(id);
 };
 
-const updateItem = (item: ShoppingItem) => {
-  store.updateItem(item);
-};
-
-const deleteItem = (item: ShoppingItem) => {
-  store.deleteItem(item.id);
-};
-
-const clearCompleted = () => {
-  store.clearCompleted();
+const deleteItem = (id: string) => {
+  store.deleteItem(id);
 };
 </script>
 

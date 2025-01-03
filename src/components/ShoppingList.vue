@@ -25,9 +25,7 @@
       </v-btn>
     </div>
 
-    <ShoppingItems
-      :items="shoppingStore.items"
-    />
+    <ShoppingItems />
   </div>
 </template>
 
