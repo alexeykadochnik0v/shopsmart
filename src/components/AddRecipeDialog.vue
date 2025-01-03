@@ -118,7 +118,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useRecipeStore } from '../stores/recipe';
-import { useDisplay } from 'vuetify';
 
 const props = defineProps<{
   modelValue?: boolean
@@ -129,7 +128,6 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const display = useDisplay();
 const recipeStore = useRecipeStore();
 
 // Используем локальное состояние для диалога
