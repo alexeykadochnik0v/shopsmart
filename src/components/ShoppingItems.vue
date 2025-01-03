@@ -84,6 +84,8 @@ const deleteItem = (id: string) => {
 .shopping-item {
   min-height: 40px !important;
   cursor: pointer;
+  padding-right: 16px !important;
+
 }
 
 .shopping-item:hover {

@@ -1,56 +1,47 @@
 <template>
   <v-app>
     <v-app-bar
+      :elevation="0"
+      class="px-3"
       :color="theme.global.current.value.dark ? 'background' : 'surface'"
-      elevation="1"
     >
-      <v-app-bar-title class="d-flex align-center">
-        <v-icon icon="mdi-cart-outline" class="mr-2" />
-        <span class="hidden-sm-and-down">Умный список покупок</span>
+      <v-app-bar-nav-icon
+        v-if="$vuetify.display.smAndDown"
+        @click="drawer = !drawer"
+        :class="{ 'rotate-180': drawer }"
+        class="transition-transform"
+      />
+
+      <v-app-bar-title class="text-primary font-weight-bold">
+        ShopSmart
       </v-app-bar-title>
 
-      <v-spacer />
-
-      <v-btn
-        icon
-        class="hidden-sm-and-down"
-        @click="showAddRecipeDialog = true"
-      >
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
-      
-      <v-btn
-        icon
-        @click="toggleTheme"
-      >
-        <v-icon>{{ theme.global.current.value.dark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
-      </v-btn>
-
-      <v-btn
-        icon
-        class="hidden-md-and-up"
-        @click="drawer = true"
-      >
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+      <template v-slot:append>
+        <div class="d-flex align-center gap-4">
+          <AddRecipeDialog v-if="!$vuetify.display.smAndDown" />
+          <v-btn
+            icon
+            @click="toggleTheme"
+          >
+            <v-icon>{{ theme.global.current.value.dark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+          </v-btn>
+        </div>
+      </template>
     </v-app-bar>
 
     <!-- Мобильное меню -->
     <v-navigation-drawer
+      v-if="$vuetify.display.smAndDown"
       v-model="drawer"
-      location="right"
       temporary
+      location="bottom"
+      height="90vh"
+      class="rounded-t-xl"
     >
       <v-list>
-        <v-list-item>
-          <v-list-item-title class="text-h6">Меню</v-list-item-title>
-        </v-list-item>
-
-        <v-divider></v-divider>
-
         <v-list-item
           prepend-icon="mdi-plus"
-          @click="showAddRecipeDialog = true"
+          @click="showAddRecipeDialog = true; drawer = false"
         >
           Добавить рецепт
         </v-list-item>
@@ -65,6 +56,7 @@
     </v-main>
 
     <AddRecipeDialog 
+      v-if="$vuetify.display.smAndDown"
       v-model="showAddRecipeDialog"
       @close="showAddRecipeDialog = false"
     />
@@ -74,18 +66,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
-import { useShoppingStore } from './stores/shopping';
-import { useRecipeStore } from './stores/recipe';
 import AddRecipeDialog from './components/AddRecipeDialog.vue';
 import ShoppingList from './components/ShoppingList.vue';
 import RecipePanel from './components/RecipePanel.vue';
+import { useShoppingStore } from './stores/shopping';
+import { useRecipeStore } from './stores/recipe';
 
-const THEME_KEY = 'shopsmart_theme';
 const theme = useTheme();
-const shoppingStore = useShoppingStore();
-const recipeStore = useRecipeStore();
 const drawer = ref(false);
 const showAddRecipeDialog = ref(false);
+const shoppingStore = useShoppingStore();
+const recipeStore = useRecipeStore();
+
+const THEME_KEY = 'shopsmart_theme';
 
 const toggleTheme = () => {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark';
@@ -109,6 +102,14 @@ onMounted(() => {
 </script>
 
 <style>
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.transition-transform {
+  transition: transform 0.2s ease-in-out;
+}
+
 html, body, #app {
   height: 100%;
   width: 100%;
@@ -118,9 +119,7 @@ html, body, #app {
 }
 
 .v-application {
-  font-family: 'Roboto', sans-serif !important;
-  line-height: 1.6;
-  background-color: rgb(var(--v-theme-background));
+  background-color: rgb(var(--v-theme-background)) !important;
 }
 
 .app-content {
@@ -146,10 +145,9 @@ html, body, #app {
     gap: 1rem;
     padding: 1rem;
   }
+}
 
-  .v-list-item {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
+.gap-4 {
+  gap: 1rem;
 }
 </style>
