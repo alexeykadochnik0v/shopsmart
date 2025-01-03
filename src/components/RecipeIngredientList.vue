@@ -35,7 +35,7 @@
 import { useTheme } from 'vuetify';
 import { useShoppingStore } from '../stores/shopping';
 
-const props = defineProps<{
+defineProps<{
   ingredients: string[];
   isExpanded: boolean;
 }>();

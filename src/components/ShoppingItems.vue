@@ -1,6 +1,6 @@
 <template>
   <v-list class="shopping-items" :lines="false">
-    <TransitionGroup name="list">
+    <TransitionGroup name="list" tag="div">
       <v-list-item
         v-for="item in store.sortedItems"
         :key="item.id"
@@ -61,10 +61,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useTheme } from 'vuetify';
 import { useShoppingStore } from '../stores/shopping';
-import { TransitionGroup } from 'vue';
+import { useTheme } from 'vuetify';
 
 const theme = useTheme();
 const store = useShoppingStore();
@@ -97,17 +95,20 @@ const deleteItem = (id: string) => {
   padding-left: 8px;
 }
 
-/* Анимации для списка */
+.completed {
+  opacity: 0.7;
+}
+
 .list-move,
 .list-enter-active,
 .list-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
 }
 
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateX(30px);
 }
 
 .list-leave-active {
