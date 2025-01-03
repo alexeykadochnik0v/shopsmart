@@ -6,7 +6,7 @@
   >
     <v-card>
       <v-card-title class="text-h5 pa-4">
-        {{ isEditing ? 'Редактировать рецепт' : 'Новый рецепт' }}
+        Новый рецепт
       </v-card-title>
 
       <v-card-text class="pa-4">
@@ -30,9 +30,9 @@
               <v-chip
                 v-bind="props"
                 :closable="true"
-                @click:close="removeIngredient(item)"
+                @click:close="removeIngredient(item.raw || item)"
               >
-                {{ item }}
+                {{ item.raw || item }}
               </v-chip>
             </template>
           </v-combobox>
@@ -53,7 +53,7 @@
           @click="saveRecipe"
           :disabled="!isValid"
         >
-          {{ isEditing ? 'Сохранить изменения' : 'Сохранить' }}
+          Сохранить
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -63,11 +63,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useRecipeStore } from '../stores/recipe';
-import type { Recipe } from '../stores/recipe';
 
 const props = defineProps<{
   modelValue: boolean
-  editRecipe?: Recipe
 }>();
 
 const emit = defineEmits<{
@@ -77,27 +75,19 @@ const emit = defineEmits<{
 
 const store = useRecipeStore();
 const form = ref<any>(null);
-const recipe = ref<Partial<Recipe>>({
+const recipe = ref<{name: string}>({
   name: '',
 });
 const ingredients = ref<string[]>([]);
-const isEditing = computed(() => !!props.editRecipe);
+
+const isValid = computed(() => {
+  return recipe.value.name && ingredients.value.length > 0;
+});
 
 watch(() => props.modelValue, (newValue) => {
   if (!newValue) {
     resetForm();
   }
-});
-
-watch(() => props.editRecipe, (recipe) => {
-  if (recipe) {
-    recipe.value = { name: recipe.name };
-    ingredients.value = [...recipe.ingredients];
-  }
-}, { immediate: true });
-
-const isValid = computed(() => {
-  return recipe.value.name && ingredients.value.length > 0;
 });
 
 const removeIngredient = (item: string) => {
@@ -110,18 +100,11 @@ const saveRecipe = async () => {
   const { valid } = await form.value.validate();
   
   if (valid) {
-    if (isEditing.value) {
-      store.updateRecipe({
-        id: props.editRecipe?.id,
-        name: recipe.value.name!,
-        ingredients: ingredients.value
-      });
-    } else {
-      store.addRecipe({
-        name: recipe.value.name!,
-        ingredients: ingredients.value
-      });
-    }
+    store.addRecipe({
+      id: Date.now().toString(),
+      name: recipe.value.name,
+      ingredients: ingredients.value
+    });
     close();
   }
 };

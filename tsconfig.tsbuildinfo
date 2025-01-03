@@ -1,0 +1,1 @@
+{"root":["./src/main.ts","./src/vite-env.d.ts","./src/stores/recipe.ts","./src/stores/shopping.ts","./src/types/shopping.ts","./src/app.vue","./src/components/addrecipedialog.vue","./src/components/recipecard.vue","./src/components/recipepanel.vue","./src/components/shoppinginput.vue","./src/components/shoppingitems.vue","./src/components/shoppinglist.vue"],"version":"5.6.3"}
