@@ -21,8 +21,8 @@ export const useShoppingStore = defineStore('shopping', {
         if (a.completed !== b.completed) {
           return a.completed ? 1 : -1;
         }
-        // В рамках одного статуса сохраняем порядок добавления
-        return a.timestamp - b.timestamp;
+        // В рамках одного статуса сортируем по времени (новые сверху)
+        return b.timestamp - a.timestamp;
       });
     },
     
@@ -64,14 +64,8 @@ export const useShoppingStore = defineStore('shopping', {
         timestamp: Date.now(),
       };
       
-      // Добавляем новый элемент в начало списка активных элементов
-      const lastActiveIndex = this.items.findIndex(item => item.completed);
-      if (lastActiveIndex === -1) {
-        this.items.push(newItem);
-      } else {
-        this.items.splice(lastActiveIndex, 0, newItem);
-      }
-      
+      // Добавляем новый элемент в самое начало списка
+      this.items.unshift(newItem);
       this.saveToLocalStorage();
     },
 

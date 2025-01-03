@@ -1,30 +1,32 @@
 <template>
   <v-expand-transition>
     <div v-if="isExpanded">
-      <v-divider></v-divider>
-      <v-list class="py-1 py-sm-2" :color="theme.global.current.value.dark ? 'background' : 'surface'">
-        <v-list-item
-          v-for="ingredient in ingredients"
-          :key="ingredient"
-          @click="addIngredient(ingredient)"
-          :ripple="true"
-          class="my-0 my-sm-1 rounded-lg"
-          color="primary"
-          :min-height="$vuetify.display.smAndDown ? 36 : 44"
-        >
-          <template v-slot:prepend>
-            <v-icon
-              icon="mdi-plus-circle-outline"
-              :size="$vuetify.display.smAndDown ? 'small' : 'default'"
-              class="mr-2"
-              color="primary"
-            />
-          </template>
-          <v-list-item-title :class="$vuetify.display.smAndDown ? 'text-body-2' : 'text-body-1'">
-            {{ ingredient }}
-          </v-list-item-title>
-        </v-list-item>
-      </v-list>
+      <div>
+        <v-divider></v-divider>
+        <v-list class="py-1 py-sm-2" :color="theme.global.current.value.dark ? 'background' : 'surface'">
+          <v-list-item
+            v-for="ingredient in ingredients"
+            :key="ingredient"
+            @click="addIngredient(ingredient)"
+            :ripple="true"
+            class="my-0 my-sm-1 rounded-lg list-item"
+            color="primary"
+            :min-height="$vuetify.display.smAndDown ? 36 : 44"
+          >
+            <template v-slot:prepend>
+              <v-icon
+                icon="mdi-plus-circle-outline"
+                :size="$vuetify.display.smAndDown ? 'small' : 'default'"
+                class="mr-2"
+                color="primary"
+              />
+            </template>
+            <v-list-item-title :class="[$vuetify.display.smAndDown ? 'text-body-2' : 'text-body-1', 'ingredient-text']">
+              {{ ingredient }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </div>
     </div>
   </v-expand-transition>
 </template>
@@ -47,7 +49,19 @@ const addIngredient = (ingredient: string) => {
 </script>
 
 <style scoped>
-.v-list-item:hover {
+.list-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.list-item:hover {
   background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+.list-item:hover .ingredient-text {
+  color: rgb(var(--v-theme-primary));
+}
+
+.ingredient-text {
+  transition: color 0.2s ease-in-out;
 }
 </style>

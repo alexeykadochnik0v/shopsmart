@@ -74,6 +74,7 @@
           variant="text"
           prepend-icon="mdi-delete"
           @click="confirmDelete"
+          class="text-none"
         >
           Удалить рецепт
         </v-btn>
@@ -82,6 +83,7 @@
           color="secondary"
           variant="text"
           @click="close"
+          class="text-none"
         >
           Отмена
         </v-btn>
@@ -89,20 +91,23 @@
           color="primary"
           @click="save"
           :disabled="!isValid"
+          class="text-none"
+          :loading="saving"
         >
-          Сохранить изменения
+          Сохранить
         </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 
   <!-- Диалог подтверждения удаления -->
-  <v-dialog v-model="showDeleteConfirm" max-width="400px">
+  <v-dialog v-model="showDeleteConfirm" max-width="400px" persistent>
     <v-card>
-      <v-card-title class="text-error">
+      <v-card-title class="text-error d-flex align-center">
+        <v-icon icon="mdi-alert" class="mr-2" color="error" />
         Удалить рецепт?
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="pt-3">
         Вы уверены, что хотите удалить рецепт "{{ props.recipe.name }}"? Это действие нельзя отменить.
       </v-card-text>
       <v-card-actions>
@@ -111,12 +116,15 @@
           color="secondary"
           variant="text"
           @click="showDeleteConfirm = false"
+          class="text-none"
         >
           Отмена
         </v-btn>
         <v-btn
           color="error"
           @click="deleteRecipe"
+          class="text-none"
+          :loading="deleting"
         >
           Удалить
         </v-btn>
@@ -149,6 +157,8 @@ const showDeleteConfirm = ref(false);
 const editedName = ref('');
 const editedIngredients = ref<string[]>([]);
 const newIngredient = ref('');
+const saving = ref(false);
+const deleting = ref(false);
 
 const isValid = computed(() => {
   return editedName.value.trim() !== '' && editedIngredients.value.length > 0;
@@ -172,13 +182,18 @@ const removeIngredient = (index: number) => {
   editedIngredients.value.splice(index, 1);
 };
 
-const save = () => {
-  recipeStore.updateRecipe({
-    ...props.recipe,
-    name: editedName.value.trim(),
-    ingredients: editedIngredients.value
-  });
-  close();
+const save = async () => {
+  saving.value = true;
+  try {
+    recipeStore.updateRecipe({
+      ...props.recipe,
+      name: editedName.value.trim(),
+      ingredients: editedIngredients.value
+    });
+    close();
+  } finally {
+    saving.value = false;
+  }
 };
 
 const close = () => {
@@ -187,15 +202,22 @@ const close = () => {
   editedIngredients.value = [];
   newIngredient.value = '';
   showDeleteConfirm.value = false;
+  saving.value = false;
+  deleting.value = false;
 };
 
 const confirmDelete = () => {
   showDeleteConfirm.value = true;
 };
 
-const deleteRecipe = () => {
-  recipeStore.removeRecipe(props.recipe.id);
-  close();
+const deleteRecipe = async () => {
+  deleting.value = true;
+  try {
+    recipeStore.removeRecipe(props.recipe.id);
+    close();
+  } finally {
+    deleting.value = false;
+  }
 };
 
 const handleDialogUpdate = (value: boolean) => {
